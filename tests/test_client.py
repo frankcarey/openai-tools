@@ -1,6 +1,6 @@
 import unittest
 from unittest import mock
-import openapi_gpt3_client as gpt3
+import openai_tools as gpt3
 import requests
 
 
