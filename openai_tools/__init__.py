@@ -18,6 +18,7 @@ class Client:
 
     def engines(self):
         resp = self.request('GET', 'engines')
+        resp.raise_for_status()
         return resp.json()
 
     def completions(self, engine: Optional[str] = None, **kwargs):
@@ -25,6 +26,7 @@ class Client:
         assert engine, "Either engine or default_engine must be provided."
 
         resp = self.request('POST', f'engines/{engine}/completions', schemas.completion.load(kwargs))
+        resp.raise_for_status()
         return schemas.completion_response.load(resp.json())
 
     def search(self, engine: Optional[str] = None, **kwargs):
@@ -32,4 +34,5 @@ class Client:
         assert engine, "Either engine or default_engine must be provided."
 
         resp = self.request('POST', f'engines/{engine}/search', schemas.search.load(kwargs))
+        resp.raise_for_status()
         return schemas.search_response.load(resp.json())

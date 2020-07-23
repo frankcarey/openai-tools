@@ -33,6 +33,24 @@ class TestClient(unittest.TestCase):
             mock_request.assert_called_once_with('GET', 'https://api.openai.com/v1/engines',
                                              headers={'Authorization': 'Bearer test_key'}, json=None)
 
+    def test_engine_request_error(self):
+        client = gpt3.Client('test_key', 'test_engine')
+        resp = requests.Response()
+        resp.status_code = 400
+        resp._content = b"""{}"""
+
+        with mock.patch('requests.request', autospec=True, return_value=resp) as mock_request:
+            raised = False
+            try:
+                result = client.engines()
+            except requests.exceptions.HTTPError:
+                raised = True
+            if not raised:
+                raise Exception("Client should throw an exception.")
+
+            mock_request.assert_called_once_with('GET', 'https://api.openai.com/v1/engines',
+                                                 headers={'Authorization': 'Bearer test_key'}, json=None)
+
     def test_completions_request(self):
         client = gpt3.Client('test_key', 'test_engine')
         resp = requests.Response()
