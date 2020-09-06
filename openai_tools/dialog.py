@@ -1,5 +1,5 @@
 from . import Client
-from typing import Dict, Optional, Any, List
+from typing import Dict, Optional, Any, List, Callable
 from dataclasses import dataclass
 
 
@@ -47,12 +47,15 @@ class Chat:
             for key, val in settings.items():
                 self.settings[key] = val
 
-    def generate_turn(self, turn_name) -> Turn:
+    def generate_turn(self, turn_name, post_gen_callback: Optional[Callable[[str, Dict], Optional[str]]] = None) -> Optional[Turn]:
         """
         Generates a dialog turn in the chat.
 
         Args:
-            turn_name: The individual to generate a turn for. Should already exist in the 'names' property before generating.
+            turn_name: The individual to generate a turn for. Should already exist in the 'names' property before
+                generating.
+            post_gen_callback: Optional callback that takes the generated response and returns the string to use as the
+                turn text or None to cancel the turn completely.
 
         Returns:
             A Turn() representing the name and their generated text.
@@ -72,10 +75,22 @@ class Chat:
         self.settings['prompt'] = prompt
         response = self.client.completions(**self.settings)
 
-        # TODO: Support the section of which choice to go with, currently assume the first.
-        turn = Turn(turn_name, response['choices'][0]['text'])
+        # Allow the callback to provide it's own text or choose from multiple options.
+        if post_gen_callback:
+            text = post_gen_callback(turn_name, response)
+        else:
+            # Otherwise we assume the first item in the list.
+            assert len(response['choices']) > 0, "The list of choices returned from OpenAI was less than 1."
+            text = response['choices'][0]['text']
 
-        # Save the this turn so we can reuse it.
+        # If text ended up as None, consider it cancelled and don't continue to add it to the turn history.
+        if text is None:
+            return None
+
+        # Create a new Turn using the text provided.
+        assert type(text) == str
+        turn = Turn(turn_name, text)
+
+        # Save the this turn so we can reuse it as preamble on the next generation and return it.
         self.turns.append(turn)
-
         return turn
