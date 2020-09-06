@@ -8,14 +8,21 @@ class CompletionRequestSchema(Schema):
     top_p = fields.Float()
     n = fields.Integer(default=1)
     stream = fields.Boolean(default=False)
-    log_probs = fields.Integer()
+    logprobs = fields.Integer()
     stop = fields.List(fields.String)
+
+
+class ChoiceLogProbsSchema(Schema):
+    tokens = fields.List(fields.String, allow_none=False)
+    token_logprobs = fields.List(fields.Float(), allow_none=False)
+    top_logprobs = fields.List(fields.Integer(), allow_none=True)
+    text_offset = fields.List(fields.Integer(), allow_none=False)
 
 
 class CompletionChoicesSchema(Schema):
     text = fields.String(required=True)
     index = fields.Integer(required=True)
-    logprobs = fields.List(fields.String(), allow_none=True)
+    logprobs = fields.Nested(ChoiceLogProbsSchema(), required=True)
     finish_reason = fields.String(required=True)
 
 
@@ -26,7 +33,6 @@ class CompletionResponseSchema(Schema):
     model = fields.String(required=True)
     choices = fields.List(fields.Nested(CompletionChoicesSchema()))
     stream = fields.Boolean(default=False)
-    log_probs = fields.Integer()
     stop = fields.List(fields.String)
 
 

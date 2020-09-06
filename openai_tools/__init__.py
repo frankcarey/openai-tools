@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 import requests
 from . import schemas
 
@@ -36,7 +36,7 @@ class Client:
         resp.raise_for_status()
         return resp.json()
 
-    def completions(self, engine: Optional[str] = None, **kwargs):
+    def completions(self, engine: Optional[str] = None, **kwargs) -> Dict:
         """
         Create a completion. This is the main endpoint of the API. Returns new text as well as, if requested,
         the probabilities over each alternative token at each position.
@@ -64,11 +64,12 @@ class Client:
         engine = engine if engine else self.default_engine
         assert engine, "Either engine or default_engine must be provided."
 
-        resp = self.request('POST', f'engines/{engine}/completions', schemas.completion.load(kwargs))
+        json = schemas.completion.load(kwargs)
+        resp = self.request('POST', f'engines/{engine}/completions', json)
         resp.raise_for_status()
         return schemas.completion_response.load(resp.json())
 
-    def search(self, engine: Optional[str] = None, **kwargs):
+    def search(self, engine: Optional[str] = None, **kwargs) -> Dict:
         """
         Perform a semantic search over a list of documents.
 
