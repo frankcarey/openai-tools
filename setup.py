@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="openai-tools-frankcarey",
-    version="0.0.1",
+    version="0.1.0",
     author="Frank Carey",
     author_email="",
     description="Unofficial OpenAI client.",
