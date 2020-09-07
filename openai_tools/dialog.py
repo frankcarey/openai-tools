@@ -1,6 +1,7 @@
 from . import Client
 from typing import Dict, Optional, Any, List, Callable
 from dataclasses import dataclass
+from copy import deepcopy
 
 
 @dataclass
@@ -47,13 +48,14 @@ class Chat:
             for key, val in settings.items():
                 self.settings[key] = val
 
-    def generate_turn(self, turn_name, post_gen_callback: Optional[Callable[[str, Dict], Optional[str]]] = None) -> Optional[Turn]:
+    def generate_turn(self, turn_name, pre_gen_callback: Optional[Callable[[str, Dict], Optional[str]]] = None, post_gen_callback: Optional[Callable[[str, Dict], Optional[str]]] = None) -> Optional[Turn]:
         """
         Generates a dialog turn in the chat.
 
         Args:
             turn_name: The individual to generate a turn for. Should already exist in the 'names' property before
                 generating.
+            pre_gen_callback: Optional callback that allows modifying the request before it's sent to openAI.
             post_gen_callback: Optional callback that takes the generated response and returns the string to use as the
                 turn text or None to cancel the turn completely.
 
@@ -73,11 +75,14 @@ class Chat:
         # Append the new turn to the prompt and send out a new completion request.
         prompt += f'{turn_name}:'
         self.settings['prompt'] = prompt
-        response = self.client.completions(**self.settings)
+
+        # allow pre_gen_callback to observe and override any of the default settings on a request by request basis.
+        settings = pre_gen_callback(deepcopy(self.settings)) if pre_gen_callback else self.settings
+        response = self.client.completions(**settings)
 
         # Allow the callback to provide it's own text or choose from multiple options.
         if post_gen_callback:
-            text = post_gen_callback(turn_name, response)
+            text = post_gen_callback(response)
         else:
             # Otherwise we assume the first item in the list.
             assert len(response['choices']) > 0, "The list of choices returned from OpenAI was less than 1."
