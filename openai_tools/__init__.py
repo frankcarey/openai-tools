@@ -5,13 +5,15 @@ from . import schemas
 
 class Client:
 
-    def __init__(self, api_key: str, default_engine: Optional[str]=None):
+    def __init__(self, api_key: str, default_engine: Optional[str] = None):
 
         self.api_key: str = api_key
         self.api_base: str = 'https://api.openai.com/v1/'
         self.default_engine = default_engine
 
-    def request(self, method: str, endpoint: str, json: Optional[dict]=None) -> requests.Response:
+        assert api_key, "Error: OpenAI API key not set in Client."
+
+    def request(self, method: str, endpoint: str, json: Optional[dict] = None) -> requests.Response:
         """
         Make a request to the openai api, automatically adding the auth header and prefixing the base api path.
 
@@ -50,7 +52,8 @@ class Client:
             **temperature (float): How 'creative' should the model be? 0 being conservative and 1 being creative.
             **top_p (int): An alternative to sampling with temperature, called nucleus sampling, where the model
                 considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising
-                the top 10% probability mass are considered. We generally recommend using this or temperature but not both.
+                the top 10% probability mass are considered. We generally recommend using this or temperature but
+                not both.
             **n (int): How many choices to create for each prompt.
             **stream (bool): Whether to stream back partial progress. If set, tokens will be sent as data-only
                 server-sent events as they become available, with the stream terminated by a data: [DONE] message.

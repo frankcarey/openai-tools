@@ -8,14 +8,17 @@ setuptools.setup(
     version="0.1.0",
     author="Frank Carey",
     author_email="",
-    description="Unofficial OpenAI client.",
+    description="Unofficial OpenAI client and dialogue generator.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/frankcarey/",
     packages=setuptools.find_packages(),
     install_requires=[
         'requests',
-        'marshmallow'
+        'marshmallow',
+        'diff-match-patch',
+        'tinymongo @ git+ssh://git@github.com/schapman1974/tinymongo@master#egg=tinymongo',
+        'pyyaml',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

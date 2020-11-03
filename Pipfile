@@ -8,6 +8,9 @@ verify_ssl = true
 [packages]
 requests = "*"
 marshmallow = "*"
+tinymongo = {editable = true, git = "https://github.com/schapman1974/tinymongo.git"}
+diff-match-patch = "*"
+pyyaml = "*"
 
 [requires]
 python_version = "3.7"
